@@ -1,10 +1,10 @@
 #include <iostream>
-#include "MergeSort.h"
-#include "Insertion.h"
-#include "Heap.h"
-#include "Quick.h"
-#include "Selection.h"
-#include "Bubble.h"
+#include "../MergeSort.h"
+#include "../inc/Insertion.h"
+#include "../Heap.h"
+#include "../inc/Quick.h"
+#include "../inc/Selection.h"
+#include "../inc/Bubble.h"
 
 using namespace std;
 
