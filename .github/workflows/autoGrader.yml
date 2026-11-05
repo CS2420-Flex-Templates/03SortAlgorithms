@@ -1,4 +1,4 @@
-name: autoGrader
+ame: autoGrader
 
 on:
   push:
@@ -11,23 +11,36 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 3
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v4
       - name: Disable initramfs update
         run: sudo sed -i 's/yes/no/g' /etc/initramfs-tools/update-initramfs.conf
       - name: Disable man-db update
         run: sudo rm -f /var/lib/man-db/auto-update
-      - name: Setup dependencies
+      - name: setup dependencies
         run: |
+          sudo apt-get update
           sudo apt-get install -y g++-14
           sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-14 100
       - name: install_valgrind
-        run: sudo apt update && sudo apt install -y valgrind
+        run: sudo apt-get install -y valgrind
+
+      # 1. Force CMake to generate the files inside a "build" folder
+      # This guarantees your custom 'valgrind' target is safely created there
+      # since Valgrind is installed right before this step.
+      # Also added CMAKE_CXX_COMPILER to ensure it uses the g++-14 you installed.
       - name: cmake
-        run: cmake -DCMAKE_BUILD_TYPE=Debug -S .
+        run: cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_COMPILER=g++-14 -B build -S .
+
+      # 2. Compile using the build folder
+      # This replaces the bare "make" command
       - name: make
-        run: make
+        run: cmake --build build
+
+      # 3. Run CTest using the build folder
       - name: ctest
-        run: ctest --output-on-failure
+        run: ctest --test-dir build --output-on-failure
+
+      # 4. Target the specific build folder to run your custom make valgrind rule
       - name: memory tests
         if: success() || failure()
-        run: make valgrind
+        run: make -C build valgrind
