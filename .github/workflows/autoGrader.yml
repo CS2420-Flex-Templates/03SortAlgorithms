@@ -12,8 +12,6 @@ jobs:
     timeout-minutes: 3
     steps:
       - uses: actions/checkout@v6
-      - name: Disable initramfs update
-        run: sudo sed -i 's/yes/no/g' /etc/initramfs-tools/update-initramfs.conf
       - name: Disable man-db update
         run: sudo rm -f /var/lib/man-db/auto-update
       - name: Setup dependencies
